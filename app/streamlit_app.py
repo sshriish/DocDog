@@ -9,10 +9,14 @@ ph = PasswordHasher()
 MAX_BYTES = int(st.secrets.get("MAX_UPLOAD_MB", 25)) * 1_000_000
 
 def q(sql, params=None, one=False):
-    with psycopg.connect(st.secrets["DATABASE_URL"], row_factory=dict_row) as c:
-        cur = c.execute(sql, params or {})
-        if not cur.description: return None
-        return cur.fetchone() if one else cur.fetchall()
+    try:
+        with psycopg.connect(st.secrets["DATABASE_URL"], row_factory=dict_row, connect_timeout=15) as c:
+            cur = c.execute(sql, params or {})
+            if not cur.description: return None
+            return cur.fetchone() if one else cur.fetchall()
+    except psycopg.OperationalError as ex:
+        st.error("Database connection failed: " + str(ex))
+        st.stop()
 
 # ---------- auth ----------
 def auth_page():
