@@ -70,7 +70,7 @@ def dashboard(u):
              from projects p left join documents d on d.project_id=p.id where p.owner_id=%(u)s""", {"u": u["id"]}, one=True)
     c = st.columns(5)
     for col, (l, v) in zip(c, [("Projects", s["projects"]), ("Documents", s["docs"]),
-            ("Storage", f"{s['bytes']/1e6:.1f} MB"), ("Processed", s["ok"]), ("Failed/unsupported", s["bad"])]):
+                        ("Storage", f"{float(s['bytes'])/1e6:.1f} MB"), ("Processed", s["ok"]), ("Failed/unsupported", s["bad"])]):
         col.metric(l, v)
     st.subheader("Recent uploads")
     st.dataframe(q("""select d.filename, p.name project, d.status, d.created_at from documents d
